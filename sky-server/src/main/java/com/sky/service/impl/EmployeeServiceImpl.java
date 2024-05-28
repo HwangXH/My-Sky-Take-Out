@@ -85,7 +85,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setCreateTime(LocalDateTime.now());
         employee.setUpdateTime(LocalDateTime.now());
         // TODO 后期改为当前登录用户的id
-        //设置当前记录创建人和修改人id
+        //设置当前记录创建人和修改人id,BaseContext通过Threadlocal来获取
         employee.setCreateUser(BaseContext.getCurrentId());
         employee.setUpdateUser(BaseContext.getCurrentId());
 
@@ -111,4 +111,56 @@ public class EmployeeServiceImpl implements EmployeeService {
         return new PageResult(total,records);
     }
 
+    /**
+     * 启用禁用员工账号
+     * @param status
+     * @param id
+     */
+    @Override
+    public void enableOrDisable(Integer status, Long id) {
+        //update employee set status = ? where id = ?
+        //进一步实现比较通用的update语句，可以根据id修改任何字段
+
+        // 创建一个实体对象来作为要update进去的对象，两种构造方法
+        /*Employee employee = new Employee();
+        employee.setStatus(status);
+        employee.setId(id);*/
+
+        Employee employee = Employee.builder()
+                .status(status)
+                .id(id)
+                .build();
+
+        employeeMapper.update(employee);
+    }
+
+    /**
+     * 根据id查询信息
+     * @param id
+     * @return
+     */
+    @Override
+    public Employee getById(Long id) {
+        Employee employee = employeeMapper.getById(id);
+        //一个比较简单的方法给密码改变为****
+        employee.setPassword("****");
+        return employee;
+    }
+
+    /**
+     * 修改员工信息
+     * @param employeeDTO
+     */
+    @Override
+    public void update(EmployeeDTO employeeDTO) {
+        //复用代码，用 启用禁用员工账号 代码部分设计的update方法
+        //update方法在mapper中已有定义，但是需要的是employee对象
+        Employee employee = new Employee();
+        BeanUtils.copyProperties(employeeDTO, employee);
+
+        employee.setUpdateTime(LocalDateTime.now());
+        employee.setUpdateUser(BaseContext.getCurrentId());
+
+        employeeMapper.update(employee);
+    }
 }

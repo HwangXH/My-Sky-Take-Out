@@ -6,3 +6,8 @@ sky:
     database: sky_take_out
     username: root
     password: huangxh213!
+  alioss:
+    endpoint: oss-cn-shenzhen.aliyuncs.com
+    access-key-id: LTAI5t78Yg6F9zcc9MSYbffM
+    access-key-secret: UjGwyjiiBgqKpRBGebSV94tL2Ai1pK
+    bucket-name: marcosjavaweb

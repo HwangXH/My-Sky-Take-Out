@@ -86,11 +86,10 @@ public class DishServiceImpl implements DishService {
     @Transactional
     public void deleteBatch(List<Long> ids) {
         //判断当前菜品是否能被删除
-
+        // TODO 反复循环地执行一条条的查询语句效率不高，可以先用where id in ..找到符合的数据，再for循环判断
         //1.是否在售中？
         for (Long id : ids) {
-            // TODO 反复循环地执行一条条的查询语句效率不高，可以先用where id in ..找到符合的数据，再for循环判断是否在售
-            // <select count(0) from dish where id in (?,?,?) and status = 1; >
+            //优化点 <select count(0) from dish where id in (?,?,?) and status = 1; >
             Dish dish = dishMapper.getById(id);
 
             if(dish.getStatus() == StatusConstant.ENABLE) {
@@ -105,15 +104,17 @@ public class DishServiceImpl implements DishService {
         }
 
 
-        for (Long id : ids) {
+        /*for (Long id : ids) {
             //删除菜品表的对应的数据
             dishMapper.deleteById(id);
 
             //删除口味表中与该菜品关联的口味数据,因为菜品的dish_id和菜品表的主键id是唯一对应的，因此可以用id表示是dish_id用在口味表
             dishFlavorMapper.deleteByDishId(id);
-        }
+        }*/
 
-
-
+        //优化点 delete from dish where id in (1,2,3)
+        dishMapper.deleteByIds(ids);
+        //优化点 delete from dish_flavor where dish_id in (1,2,3)
+        dishFlavorMapper.deleteByDishIds(ids);
     }
 }

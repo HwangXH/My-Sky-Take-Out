@@ -37,7 +37,7 @@ public class DishServiceImpl implements DishService {
     private SetmealDishMapper setmealDishMapper;
 
     /**
-     * 新增菜品和对应的口味（因为设计到菜品表和口味表）
+     * 新增菜品和对应的口味（因为涉及到菜品表和口味表）
      * @param dishDTO
      */
     //因为要修改两张表，因此引入事务去处理，保证方法是原子性
@@ -159,5 +159,22 @@ public class DishServiceImpl implements DishService {
             });
             dishFlavorMapper.insertBatch(flavors);
         }
+    }
+
+    /**
+     * 根据菜品分类id查询多个菜品
+     * @param categoryId
+     * @return
+     */
+    public List<Dish> list(Long categoryId) {
+
+        Dish dish = Dish.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+
+        //去dish表中去找符合条件（指在售的，分类id=？）的菜品，返回一个list
+        List<Dish> dishList = dishMapper.list(dish);
+        return dishList;
     }
 }

@@ -38,6 +38,7 @@ public interface EmployeeMapper {
      */
     Page<Employee> pageQuery(EmployeePageQueryDTO employeePageQueryDTO);
 
+    //实现比较通用的update语句，可以根据id修改任何字段
     /**
      * 根据主键来动态修改属性
      * @param employee

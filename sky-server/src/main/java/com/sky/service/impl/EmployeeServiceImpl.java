@@ -121,7 +121,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public void enableOrDisable(Integer status, Long id) {
         //update employee set status = ? where id = ?
-        //进一步实现比较通用的update语句，可以根据id修改任何字段
+
 
         // 创建一个实体对象来作为要update进去的对象，两种构造方法
         /*Employee employee = new Employee();
@@ -133,6 +133,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .id(id)
                 .build();
 
+        // TODO 进一步实现比较通用的Mapper的update语句，可以根据id修改任何字段
         employeeMapper.update(employee);
     }
 

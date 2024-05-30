@@ -66,6 +66,7 @@ public class DishServiceImpl implements DishService {
         }
     }
 
+    //为什么菜品分页查询用了VO，员工分页查询没有用VO，而是employee
     /**
      * 菜品分页查询
      * @param dishPageQueryDTO

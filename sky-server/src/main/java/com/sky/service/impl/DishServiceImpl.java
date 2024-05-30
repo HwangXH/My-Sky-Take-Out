@@ -110,7 +110,7 @@ public class DishServiceImpl implements DishService {
             dishMapper.deleteById(id);
 
             //删除口味表中与该菜品关联的口味数据,因为菜品的dish_id和菜品表的主键id是唯一对应的，因此可以用id表示是dish_id用在口味表
-            dishFlavorMapper.deleteByDishId(id);
+            dishFlavorMapper.deleteBySetmealId(id);
         }*/
 
         //优化点 delete from dish where id in (1,2,3)

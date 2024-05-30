@@ -87,6 +87,45 @@ public class SetmealServiceImpl implements SetmealService {
             }
         }
         setmealMapper.deleteByIds(ids);
-        setmealDishMapper.deleteBySetmealId(ids);
+        setmealDishMapper.deleteBySetmealIds(ids);
+    }
+
+    /**
+     * 根据id查询套餐和套餐内的菜品
+     * @param id
+     * @return
+     */
+    public SetmealVO getByIdWithDish(Long id) {
+        Setmeal setmeal = setmealMapper.getById(id);
+        List<SetmealDish> setmealDishes = setmealDishMapper.getBySetmealId(id);
+
+        SetmealVO setmealVO = new SetmealVO();
+        BeanUtils.copyProperties(setmeal, setmealVO);
+        setmealVO.setSetmealDishes(setmealDishes);
+        return setmealVO;
+    }
+
+    /**
+     * 修改套餐，涉及到修改套餐表 和 套餐-菜品表，因此要用事务保持一致性
+     * @param setmealDTO
+     */
+    @Transactional
+    public void updateWithDish(SetmealDTO setmealDTO) {
+        //修改套餐表的基本信息，先不管套餐的菜品信息
+        Setmeal setmeal = new Setmeal();
+        BeanUtils.copyProperties(setmealDTO, setmeal);
+        setmealMapper.update(setmeal);
+
+        //删除套餐和菜品的关系，先删除后新增关系
+        setmealDishMapper.deleteBySetmealId(setmealDTO.getId());
+
+        //获取到
+        List<SetmealDish> dishes = setmealDTO.getSetmealDishes();
+        dishes.forEach(setmealDish -> {
+            setmealDish.setSetmealId(setmeal.getId());
+        });
+        //把修改后的该套餐含有的菜品一起写入表中
+        setmealDishMapper.insertBatch(dishes);
+
     }
 }

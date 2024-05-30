@@ -9,6 +9,13 @@
         (#{categoryId}, #{name}, #{price}, #{status}, #{description}, #{image}, #{createTime}, #{updateTime}, #{createUser}, #{updateUser})
     </insert>
 
+    <delete id="deleteByIds">
+        delete from setmeal where id in
+        <foreach collection="ids" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </delete>
+
     <select id="pageQuery" resultType="com.sky.vo.SetmealVO">
         SELECT s.*,c.name category_name FROM setmeal s LEFT JOIN category c ON s.category_id = c.id
         <where>

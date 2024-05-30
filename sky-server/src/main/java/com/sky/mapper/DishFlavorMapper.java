@@ -24,7 +24,7 @@ public interface DishFlavorMapper {
     void deleteByDishId(Long dishId);
 
     /**
-     * 批量删除口味表中的对应(批量)品的口味
+     * 批量删除口味表中的对应(批量)菜品的口味
      * @param dishIds
      */
     void deleteByDishIds(List<Long> dishIds);

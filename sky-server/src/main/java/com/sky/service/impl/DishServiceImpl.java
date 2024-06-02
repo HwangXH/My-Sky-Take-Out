@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -163,7 +164,7 @@ public class DishServiceImpl implements DishService {
     }
 
     /**
-     * 根据菜品分类id查询多个菜品
+     * 根据菜品分类id查询多个菜品，在管理端使用，只根据分类返回一些菜品
      * @param categoryId
      * @return
      */
@@ -177,5 +178,47 @@ public class DishServiceImpl implements DishService {
         //去dish表中去找符合条件（指在售的，分类id=？）的菜品，返回一个list
         List<Dish> dishList = dishMapper.list(dish);
         return dishList;
+    }
+
+    /**
+     * 根据菜品分类id查询多个菜品，并且在Service层中进一步根据菜品名称查询口味返回给用户端去显示（因为VO要求有口味list）
+     * @param categoryId
+     * @return
+     */
+    public List<DishVO> listWithFlavor(Long categoryId) {
+        Dish dish = Dish.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+        //根据分类id查询到该分类的所有菜品
+        List<Dish> dishList = dishMapper.list(dish);
+
+        List<DishVO> dishVOList = new ArrayList<>();
+
+        //根据菜品id查询到该菜品的所有口味，并且封装到VO中
+        for (Dish d : dishList) {
+            DishVO dishVO = new DishVO();
+            BeanUtils.copyProperties(d,dishVO);
+
+            //根据菜品id查询对应的口味
+            List<DishFlavor> flavors = dishFlavorMapper.getByDishId(d.getId());
+
+            dishVO.setFlavors(flavors);
+            dishVOList.add(dishVO);
+        }
+        return dishVOList;
+    }
+
+    /**
+     * 起售或者停售菜品
+     * @param status
+     * @param id
+     */
+    public void enableOrDisable(Integer status, Long id) {
+        Dish dish = Dish.builder()
+                .id(id)
+                .status(status)
+                .build();
+        dishMapper.update(dish);
     }
 }

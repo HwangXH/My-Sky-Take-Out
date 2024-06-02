@@ -72,10 +72,19 @@ public class DishController {
         return Result.success();
     }
 
+    @PostMapping("/status/{status}")
+    @ApiOperation("起售或者停售菜品")
+    public Result enableOrDisable(@PathVariable Integer status, Long id){
+        log.info("起售或者停售菜品: {}, {}", id, status);
+        dishService.enableOrDisable(status, id);
+        return Result.success();
+    }
+
     //在套餐涉及的菜品选择上，根据菜品的分类来呈现同一分类的菜品，根据菜品分类id查询菜品为后面做铺垫
     @GetMapping("/list")
     @ApiOperation("根据分类id查询菜品")
     public Result<List<Dish>> list(Long categoryId) {
+        log.info("管理端根据分类id查询菜品: {}", categoryId);
         List<Dish> dishList = dishService.list(categoryId);
         return Result.success(dishList);
     }

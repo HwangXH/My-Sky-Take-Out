@@ -15,6 +15,7 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -92,7 +93,7 @@ public class SetmealServiceImpl implements SetmealService {
     }
 
     /**
-     * 根据id查询套餐和套餐内的菜品
+     * 根据套餐id查询套餐和套餐内的菜品，包括套餐的状态，分类等管理端才需要的数据信息，但是不包括菜品的份数，返回的是一个套餐的VO
      * @param id
      * @return
      */
@@ -154,5 +155,29 @@ public class SetmealServiceImpl implements SetmealService {
                 .status(status)
                 .build();
         setmealMapper.update(setmeal);
+    }
+
+    /**
+     * 根据套餐分类id查询多个套餐
+     * @param categoryId
+     * @return
+     */
+    public List<Setmeal> list(Long categoryId) {
+        Setmeal setmeal = Setmeal.builder()
+                .categoryId(categoryId)
+                .status(StatusConstant.ENABLE)
+                .build();
+
+        List<Setmeal> setmealList = setmealMapper.list(setmeal);
+        return setmealList;
+    }
+
+    /**
+     * 根据套餐id查询套餐内的菜品数据，包括菜品的份数，图片等用户关注的数据，返回的是一个由菜品itemVO组成的list
+     * @param id
+     * @return
+     */
+    public List<DishItemVO> getDishItemById(Long id) {
+        return setmealDishMapper.getDishItemById(id);
     }
 }

@@ -104,7 +104,7 @@ public class DishServiceImpl implements DishService {
             }
         }
 
-        //2.菜品是否关联有套餐?
+        //2.菜品是否关联有套餐?必须没有套餐包含该菜品才能删除
         List<Long> setmealIds = setmealDishMapper.getSetmealIdsByDishIds(ids);
         if(setmealIds!=null && setmealIds.size()>0) {
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);

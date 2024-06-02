@@ -11,6 +11,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,7 +62,7 @@ public class DishController {
         log.info("菜品批量删除: {}", ids);
         //清空所有redis缓存，直接粗暴
         // TODO 是否有更好的方法提高redis操作效率？不过商家一般经常修改菜品的信息
-        clearCache("dish_*");
+        //clearCache("dish_*");
         dishService.deleteBatch(ids);
         return Result.success();
     }
@@ -77,18 +79,23 @@ public class DishController {
 
     @PutMapping
     @ApiOperation("修改菜品信息")
+    @CacheEvict(cacheNames = "dishCache", key = "#dishDTO.categoryId")
     public Result update(@RequestBody DishDTO dishDTO) {
         log.info("修改菜品: {}", dishDTO);
-        clearCache("dish_*");
+        //clearCache("dish_*");
         dishService.updateWithFlavor(dishDTO);
         return Result.success();
     }
 
     @PostMapping("/status/{status}")
     @ApiOperation("起售或者停售菜品")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "dishCache", allEntries = true),
+            @CacheEvict(cacheNames = "setmealCache", allEntries = true)
+            })
     public Result enableOrDisable(@PathVariable Integer status, Long id){
         log.info("起售或者停售菜品: {}, {}", id, status);
-        clearCache("dish_*");
+        //clearCache("dish_*");
         dishService.enableOrDisable(status, id);
         return Result.success();
     }
@@ -102,7 +109,6 @@ public class DishController {
         return Result.success(dishList);
     }
 
-    // TODO
     private void clearCache(String pattern){
         Set keys = redisTemplate.keys(pattern);
         redisTemplate.delete(keys);

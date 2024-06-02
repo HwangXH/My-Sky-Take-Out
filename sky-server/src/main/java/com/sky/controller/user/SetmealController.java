@@ -9,10 +9,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RestController("userSetmealController")
@@ -26,6 +28,7 @@ public class SetmealController {
 
     @GetMapping("/list")
     @ApiOperation("根据分类id查询套餐")
+    @Cacheable(cacheNames = "setmealCache", key = "#categoryId")
     public Result<List<Setmeal>> list(Long categoryId) {
         log.info("客户端根据分类id查询套餐: {}", categoryId);
         List<Setmeal> list = setmealService.list(categoryId);
@@ -33,6 +36,7 @@ public class SetmealController {
     }
 
     //用在点开某套餐内的菜品展示详情时
+    //缓存的value是result结果对象，怎么存的，怎么从result结果中取出缓存数据出来，未知
     @GetMapping("/dish/{id}")
     @ApiOperation("根据套餐id查询包含的菜品列表")
     public Result<List<DishItemVO>> dishList(@PathVariable("id") Long id) {

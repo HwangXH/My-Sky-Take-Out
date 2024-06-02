@@ -10,6 +10,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -58,14 +60,20 @@ public class SetmealController {
 
     @PutMapping
     @ApiOperation("修改套餐")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result update(@RequestBody SetmealDTO setmealDTO){
         log.info("修改套餐: {}", setmealDTO);
         setmealService.updateWithDish(setmealDTO);
         return Result.success();
     }
 
+    //因为新增套餐和删除套餐都要判断套餐当前是否停售，停售才可操作，且起售用户才会看到
+    //因此只需要在起售或停售的接口中清理缓存
+    // TODO 进一步细化key的取值，来区分两类套餐的清理，因为套餐起售停售只操作1个，可只清理对应分类的缓存（但是效率提升可能并不明显）
+    // TODO 优化bug，停售菜品时，套餐也要停售
     @PostMapping("/status/{status}")
     @ApiOperation("起售或者停售套餐")
+    @CacheEvict(cacheNames = "setmealCache", allEntries = true)
     public Result enableOrDisable(@PathVariable Integer status, Long id){
         log.info("起售或者停售套餐: {}, {}", id, status);
         setmealService.enableOrDisable(status, id);

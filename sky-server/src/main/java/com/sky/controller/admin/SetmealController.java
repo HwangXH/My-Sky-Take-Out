@@ -25,6 +25,7 @@ public class SetmealController {
     @Autowired
     private SetmealService setmealService;
 
+    // TODO 套餐内的菜品没能够设置口味
     @PostMapping
     @ApiOperation("新增套餐")
     public Result save(@RequestBody SetmealDTO setmealDTO){

@@ -22,6 +22,9 @@
             <if test="rejectionReason != null and rejectionReason!='' ">
                 rejection_reason=#{rejectionReason},
             </if>
+            <if test="remark != null">
+                remark=#{remark},
+            </if>
             <if test="cancelTime != null">
                 cancel_time=#{cancelTime},
             </if>

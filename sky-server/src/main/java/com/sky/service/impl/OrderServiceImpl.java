@@ -83,6 +83,9 @@ public class OrderServiceImpl implements OrderService {
         Orders orders = new Orders();
         BeanUtils.copyProperties(ordersSubmitDTO, orders);
 
+        String address = addressBook.getProvinceName() + addressBook.getCityName() + addressBook.getDistrictName()
+                + addressBook.getDetail();
+        orders.setAddress(address);
         orders.setOrderTime(LocalDateTime.now());
         orders.setPayStatus(Orders.UN_PAID); // 未支付
         orders.setStatus(Orders.PENDING_PAYMENT); // 待付款
@@ -338,7 +341,7 @@ public class OrderServiceImpl implements OrderService {
 
         OrderStatisticsVO orderStatisticsVO = OrderStatisticsVO.builder()
                 .toBeConfirmed(orderMapper.countStatus(Orders.TO_BE_CONFIRMED))
-                .confirmed(orderMapper.countStatus(Orders.TO_BE_CONFIRMED))
+                .confirmed(orderMapper.countStatus(Orders.CONFIRMED))
                 .deliveryInProgress(orderMapper.countStatus(Orders.DELIVERY_IN_PROGRESS))
                 .build();
         return orderStatisticsVO;
@@ -461,6 +464,21 @@ public class OrderServiceImpl implements OrderService {
 
         orders.setStatus(Orders.COMPLETED);
         orders.setDeliveryTime(LocalDateTime.now());
+        orderMapper.update(orders);
+    }
+
+    /**
+     * 用户催单，通过修改备注的方式
+     * @param id
+     */
+    public void remind(Long id) {
+        Orders orders = orderMapper.getById(id);
+
+        if (orders == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+
+        orders.setRemark(orders.getRemark() + "用户催单");
         orderMapper.update(orders);
     }
 }

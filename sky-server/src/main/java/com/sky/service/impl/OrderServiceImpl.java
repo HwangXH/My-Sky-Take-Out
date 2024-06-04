@@ -215,17 +215,51 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 根据订单主键去查询某个订单详情
-     * @param orderId
+     * @param id
      * @return
      */
-    public OrderVO detail(Long orderId) {
-        Orders orders = orderMapper.getById(orderId);
+    public OrderVO detail(Long id) {
+        Orders orders = orderMapper.getById(id);
 
-        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(orderId);
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
         OrderVO orderVO = new OrderVO();
         BeanUtils.copyProperties(orders, orderVO);
         orderVO.setOrderDetailList(orderDetailList);
 
         return orderVO;
+    }
+
+    /**
+     * 用户端取消订单，但是订单得要是 待付款 或 待接单的状态
+     * @param id
+     */
+    public void cancelByUser(Long id) throws Exception {
+        Orders orders = orderMapper.getById(id);
+
+        //检查订单是否还存在
+        if (orders == null){
+            throw new OrderBusinessException(MessageConstant.ORDER_NOT_FOUND);
+        }
+        //检查订单是否 属于 待付款或者待接单，不满足则不能取消
+        if (orders.getStatus() > 2){
+            throw new OrderBusinessException(MessageConstant.ORDER_STATUS_ERROR);
+        }
+
+        //如果是待接单，那么额外操作一下申请退款
+        if (orders.getStatus().equals(Orders.TO_BE_CONFIRMED)){
+            /*//调用微信支付的退款接口
+            weChatPayUtil.refund(
+                    orders.getNumber(),
+                    orders.getNumber(),
+                    new BigDecimal(0.01),
+                    new BigDecimal(0.01));*/
+            //支付状态修改为 退款
+            orders.setPayStatus(Orders.REFUND);
+        }
+        //更新订单状态，取消原因和取消时间
+        orders.setStatus(Orders.CANCELLED);
+        orders.setCancelReason("用户取消");
+        orders.setCancelTime(LocalDateTime.now());
+        orderMapper.update(orders);
     }
 }

@@ -1,8 +1,11 @@
 package com.sky.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.sky.constant.MessageConstant;
 import com.sky.context.BaseContext;
+import com.sky.dto.OrdersPageQueryDTO;
 import com.sky.dto.OrdersPaymentDTO;
 import com.sky.dto.OrdersSubmitDTO;
 import com.sky.entity.*;
@@ -10,10 +13,12 @@ import com.sky.exception.AddressBookBusinessException;
 import com.sky.exception.OrderBusinessException;
 import com.sky.exception.ShoppingCartBusinessException;
 import com.sky.mapper.*;
+import com.sky.result.PageResult;
 import com.sky.service.OrderService;
 import com.sky.utils.WeChatPayUtil;
 import com.sky.vo.OrderPaymentVO;
 import com.sky.vo.OrderSubmitVO;
+import com.sky.vo.OrderVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -155,7 +160,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     /**
-     * 订单支付成功，修改订单状态
+     * 订单支付成功，修改订单状态，现在无法使用微信支付，所以本质是在payment方法中直接调用
      * @param outTradeNo
      */
     public void paySuccess(String outTradeNo) {
@@ -171,5 +176,40 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         orderMapper.update(orders);
+    }
+
+    /**
+     * 用户端历史订单分页查询
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    public PageResult pageQueryForUser(OrdersPageQueryDTO ordersPageQueryDTO) {
+        PageHelper.startPage(ordersPageQueryDTO.getPage(), ordersPageQueryDTO.getPageSize());
+
+        Page<Orders> page = orderMapper.pageQuery(ordersPageQueryDTO);
+
+        long total = page.getTotal();
+
+        //不仅需要订单表，还需要补充订单明细
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (page!=null && total >0){
+            for (Orders orders : page) {
+                Long ordersId = orders.getId();
+
+                //根据1条订单的id去查询订单明细
+                List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(ordersId);
+
+                OrderVO orderVO = new OrderVO();
+                // 因为OrderVO是在Orders实体类的基础上多加了两个属性，orderDishes选择不赋值，赋值orderDetailList
+                BeanUtils.copyProperties(orders, orderVO);
+                orderVO.setOrderDetailList(orderDetailList);
+
+                orderVOList.add(orderVO);
+            }
+        }
+
+        List<OrderVO> records = orderVOList;
+
+        return new PageResult(total, records);
     }
 }

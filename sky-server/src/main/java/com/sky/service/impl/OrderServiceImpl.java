@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -261,5 +262,31 @@ public class OrderServiceImpl implements OrderService {
         orders.setCancelReason("用户取消");
         orders.setCancelTime(LocalDateTime.now());
         orderMapper.update(orders);
+    }
+
+    /**
+     * 根据订单历史的主键再来一单
+     * @param id
+     */
+    public void repetition(Long id) {
+        Long userId = BaseContext.getCurrentId();
+
+        //先清楚当前购物车内的所有的商品
+        shoppingCartMapper.deleteByUserId(userId);
+
+        //根据订单id在明细表中查询订单明细
+        List<OrderDetail> orderDetailList = orderDetailMapper.getByOrderId(id);
+
+        //生成新的购物车条目
+        List<ShoppingCart> shoppingCartList = orderDetailList.stream().map(x -> {
+            //对于订单详情的每一条，都生成一次新的购物车内容，属性拷贝（不拷贝明细表的主键）
+            ShoppingCart shoppingCart = new ShoppingCart();
+            BeanUtils.copyProperties(x, shoppingCart, "id");
+            shoppingCart.setUserId(userId);
+            shoppingCart.setCreateTime(LocalDateTime.now());
+            return shoppingCart;
+        }).toList();
+
+        shoppingCartMapper.insertBatch(shoppingCartList);
     }
 }

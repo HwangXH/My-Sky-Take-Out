@@ -49,4 +49,10 @@ public interface OrderService {
      * @param id
      */
     void cancelByUser(Long id) throws Exception;
+
+    /**
+     * 根据订单历史的主键再来一单
+     * @param id
+     */
+    void repetition(Long id);
 }

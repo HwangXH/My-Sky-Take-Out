@@ -1,10 +1,9 @@
 package com.sky.service;
 
-import com.sky.dto.OrdersPageQueryDTO;
-import com.sky.dto.OrdersPaymentDTO;
-import com.sky.dto.OrdersSubmitDTO;
+import com.sky.dto.*;
 import com.sky.result.PageResult;
 import com.sky.vo.OrderPaymentVO;
+import com.sky.vo.OrderStatisticsVO;
 import com.sky.vo.OrderSubmitVO;
 import com.sky.vo.OrderVO;
 
@@ -45,7 +44,7 @@ public interface OrderService {
     OrderVO detail(Long id);
 
     /**
-     * 根据订单表的主键取消某个订单
+     * 用户根据订单表的主键取消某个订单
      * @param id
      */
     void cancelByUser(Long id) throws Exception;
@@ -55,4 +54,47 @@ public interface OrderService {
      * @param id
      */
     void repetition(Long id);
+
+    /**
+     * 管理端根据条件搜索订单
+     * @param ordersPageQueryDTO
+     * @return
+     */
+    PageResult pageSearch(OrdersPageQueryDTO ordersPageQueryDTO);
+
+    /**
+     * 统计各个状态的订单数量
+     * @return
+     */
+    OrderStatisticsVO statistics();
+
+    /**
+     * 商家接单
+     * @param ordersConfirmDTO
+     */
+    void confirm(OrdersConfirmDTO ordersConfirmDTO);
+
+    /**
+     * 商家拒单
+     * @param ordersRejectionDTO
+     */
+    void reject(OrdersRejectionDTO ordersRejectionDTO) throws Exception;
+
+    /**
+     * 商家取消订单
+     * @param ordersCancelDTO
+     */
+    void cancelByAdmin(OrdersCancelDTO ordersCancelDTO) throws Exception;
+
+    /**
+     * 商家开始派送
+     * @param id
+     */
+    void delivery(Long id);
+
+    /**
+     * 商家完成订单
+     * @param id
+     */
+    void complete(Long id);
 }

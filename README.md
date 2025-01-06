@@ -1,2 +1,2 @@
 # My-Sky-Take-Out
-My first java project
+My first JAVA project for practice...
